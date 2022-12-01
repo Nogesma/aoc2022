@@ -1,8 +1,8 @@
 extern crate core;
 
 use std::fs::File;
-use std::io::{BufReader, Lines};
 use std::io::prelude::*;
+use std::io::{BufReader, Lines};
 use std::iter::Enumerate;
 use std::path::Path;
 
@@ -32,15 +32,17 @@ fn get_calories(input: &mut Enumerate<Lines<BufReader<File>>>) -> i32 {
 }
 
 fn get_max_calories(input: &mut Enumerate<Lines<BufReader<File>>>) -> i32 {
-    let mut max_cals = 0;
+    let mut max_cals = [0, 0, 0];
     let mut cals: i32 = 0;
     while cals != -1 {
         cals = get_calories(input);
-        if cals > max_cals {
-            max_cals = cals;
+        if cals > max_cals[0] {
+            max_cals[0] = cals;
         }
+        max_cals.sort();
+        println!("[{}, {}, {}]", max_cals[0], max_cals[1], max_cals[2]);
     }
-    return max_cals;
+    return max_cals.iter().sum();
 }
 
 fn main() {
