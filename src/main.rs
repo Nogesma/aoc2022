@@ -19,35 +19,23 @@ fn get_input() -> Enumerate<Lines<BufReader<File>>> {
     return reader.lines().enumerate();
 }
 
-fn get_outcome_score(a: u32, b: u32) -> u32 {
-    if a == b {
-        return 3;
+fn get_shape_score(a: i32, b: i32) -> i32 {
+    if b == 1 {
+        return a;
     }
-    return if a > b {
-        if b == 1 && a == 3 {
-            return 6;
-        }
-        0
-    } else {
-        if a == 1 && b == 3 {
-            return 0;
-        }
-        6
-    };
+    return (if b == 0 { a - 1 } else { a + 1 }).rem_euclid(3);
 }
 
-fn get_round_score((_, line): (usize, Result<String, std::io::Error>)) -> u32 {
+fn get_round_score((_, line): (usize, Result<String, std::io::Error>)) -> i32 {
     let line = line.unwrap();
 
-    let a = line.chars().next().unwrap() as u32 - 'A' as u32 + 1;
-    let b = line.chars().last().unwrap() as u32 - 'X' as u32 + 1;
+    let a = line.chars().next().unwrap() as i32 - 'A' as i32;
+    let b = line.chars().last().unwrap() as i32 - 'X' as i32;
 
-    let outcome_score = get_outcome_score(a, b);
-
-    return outcome_score + b;
+    return get_shape_score(a, b) + 1 + b * 3;
 }
 
-fn get_total_score(input: &mut Enumerate<Lines<BufReader<File>>>) -> u32 {
+fn get_total_score(input: &mut Enumerate<Lines<BufReader<File>>>) -> i32 {
     return input.map(get_round_score).sum();
 }
 
