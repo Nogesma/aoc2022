@@ -19,33 +19,39 @@ fn get_input() -> Enumerate<Lines<BufReader<File>>> {
     return reader.lines().enumerate();
 }
 
-fn get_calories(input: &mut Enumerate<Lines<BufReader<File>>>) -> i32 {
-    let mut cals = 0;
-    for (_, line) in input {
-        let line = line.unwrap();
-        if line.len() == 0 {
-            return cals;
-        }
-        cals += line.parse::<i32>().unwrap();
+fn get_outcome_score(a: u32, b: u32) -> u32 {
+    if a == b {
+        return 3;
     }
-    return -1;
+    return if a > b {
+        if b == 1 && a == 3 {
+            return 6;
+        }
+        0
+    } else {
+        if a == 1 && b == 3 {
+            return 0;
+        }
+        6
+    };
 }
 
-fn get_max_calories(input: &mut Enumerate<Lines<BufReader<File>>>) -> i32 {
-    let mut max_cals = [0, 0, 0];
-    let mut cals: i32 = 0;
-    while cals != -1 {
-        cals = get_calories(input);
-        if cals > max_cals[0] {
-            max_cals[0] = cals;
-        }
-        max_cals.sort();
-        println!("[{}, {}, {}]", max_cals[0], max_cals[1], max_cals[2]);
-    }
-    return max_cals.iter().sum();
+fn get_round_score((_, line): (usize, Result<String, std::io::Error>)) -> u32 {
+    let line = line.unwrap();
+
+    let a = line.chars().next().unwrap() as u32 - 'A' as u32 + 1;
+    let b = line.chars().last().unwrap() as u32 - 'X' as u32 + 1;
+
+    let outcome_score = get_outcome_score(a, b);
+
+    return outcome_score + b;
+}
+
+fn get_total_score(input: &mut Enumerate<Lines<BufReader<File>>>) -> u32 {
+    return input.map(get_round_score).sum();
 }
 
 fn main() {
     let mut input = get_input();
-    println!("{}", get_max_calories(&mut input));
+    println!("{}", get_total_score(&mut input));
 }
