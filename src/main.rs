@@ -19,24 +19,24 @@ fn get_input() -> Enumerate<Lines<BufReader<File>>> {
     return reader.lines().enumerate();
 }
 
-fn get_shape_score(a: i32, b: i32) -> i32 {
-    if b == 1 {
-        return a;
-    }
-    return (if b == 0 { a - 1 } else { a + 1 }).rem_euclid(3);
-}
-
-fn get_round_score((_, line): (usize, Result<String, std::io::Error>)) -> i32 {
+fn get_common_item((_, line): (usize, Result<String, std::io::Error>)) -> i32 {
     let line = line.unwrap();
 
-    let a = line.chars().next().unwrap() as i32 - 'A' as i32;
-    let b = line.chars().last().unwrap() as i32 - 'X' as i32;
+    let (first, second) = line.split_at(line.len() / 2);
 
-    return get_shape_score(a, b) + 1 + b * 3;
+    for c in first.chars() {
+        if second.contains(c) {
+            if c.is_uppercase() {
+                return c as i32 - 'A' as i32 + 27;
+            }
+            return c as i32 - 'a' as i32 + 1;
+        }
+    }
+    panic!("No common chars: {} {}, {}", first, second, line);
 }
 
 fn get_total_score(input: &mut Enumerate<Lines<BufReader<File>>>) -> i32 {
-    return input.map(get_round_score).sum();
+    return input.map(get_common_item).sum();
 }
 
 fn main() {
