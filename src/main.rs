@@ -19,49 +19,30 @@ fn get_input() -> Enumerate<Lines<BufReader<File>>> {
     reader.lines().enumerate()
 }
 
-fn get_common_item(
-    e1: Result<String, std::io::Error>,
-    e2: Result<String, std::io::Error>,
-    e3: Result<String, std::io::Error>,
-) -> i32 {
-    let e1 = e1.unwrap();
-    let e2 = e2.unwrap();
-    let e3 = e3.unwrap();
+fn has_overlap((_, line): (usize, Result<String, std::io::Error>)) -> i32 {
+    let line = line.unwrap();
 
-    for c in e1.chars() {
-        if e2.contains(c) && e3.contains(c) {
-            if c.is_uppercase() {
-                return c as i32 - 'A' as i32 + 27;
-            }
-            return c as i32 - 'a' as i32 + 1;
-        }
-    }
-    panic!("No common chars:\n{}\n{}\n{}", e1, e2, e3);
+    let v: [[i32; 2]; 2] = line
+        .split(',')
+        .map(|x| {
+            x.split('-')
+                .map(|y| y.parse::<i32>().unwrap())
+                .collect::<Vec<i32>>()
+                .try_into()
+                .unwrap()
+        })
+        .collect::<Vec<[i32; 2]>>()
+        .try_into()
+        .unwrap();
+
+    ((v[0][0] <= v[1][0] && v[0][1] >= v[1][1]) || v[1][0] <= v[0][0] && v[1][1] >= v[0][1]) as i32
 }
 
-fn get_total_score(input: &mut Enumerate<Lines<BufReader<File>>>) -> i32 {
-    let mut total = 0;
-
-    loop {
-        let e1 = input.next();
-        if let None = e1 {
-            return total;
-        }
-        let e2 = input.next();
-        let e3 = input.next();
-
-        if let None = e2 {
-            panic!("Missing second elf");
-        }
-        if let None = e3 {
-            panic!("Missing third elf");
-        }
-
-        total += get_common_item(e1.unwrap().1, e2.unwrap().1, e3.unwrap().1);
-    }
+fn get_total_overlap(input: &mut Enumerate<Lines<BufReader<File>>>) -> i32 {
+    input.map(has_overlap).sum()
 }
 
 fn main() {
     let mut input = get_input();
-    println!("{}", get_total_score(&mut input));
+    println!("{}", get_total_overlap(&mut input));
 }
