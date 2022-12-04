@@ -35,7 +35,8 @@ fn has_overlap((_, line): (usize, Result<String, std::io::Error>)) -> i32 {
         .try_into()
         .unwrap();
 
-    ((v[0][0] <= v[1][0] && v[0][1] >= v[1][1]) || v[1][0] <= v[0][0] && v[1][1] >= v[0][1]) as i32
+    ((v[1][0] <= v[0][1] && v[0][0] <= v[1][0]) || (v[0][0] <= v[1][1] && v[1][0] <= v[0][0]))
+        as i32
 }
 
 fn get_total_overlap(input: &mut Enumerate<Lines<BufReader<File>>>) -> i32 {
