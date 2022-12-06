@@ -1,5 +1,6 @@
 extern crate core;
 
+use std::collections::VecDeque;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{BufReader, Lines};
@@ -19,31 +20,62 @@ fn get_input() -> Enumerate<Lines<BufReader<File>>> {
     reader.lines().enumerate()
 }
 
-fn has_overlap((_, line): (usize, Result<String, std::io::Error>)) -> i32 {
+fn parse_stack(input: &mut Enumerate<Lines<BufReader<File>>>) -> Vec<VecDeque<char>> {
+    let (_, line) = input.next().unwrap();
+    let mut line = line.unwrap();
+
+    let size = (line.len() + 1) / 4;
+
+    let mut stack: Vec<VecDeque<char>> = (0..size).map(|_| VecDeque::new()).collect();
+
+    while !line.is_empty() {
+        line.chars()
+            .skip(1)
+            .enumerate()
+            .step_by(4)
+            .for_each(|(s, c)| {
+                if c.is_uppercase() {
+                    stack[s / 4].push_back(c)
+                }
+            });
+
+        line = input.next().unwrap().1.unwrap();
+    }
+    stack
+}
+
+fn apply_move(stack: &mut [VecDeque<char>], (_, line): (usize, Result<String, std::io::Error>)) {
     let line = line.unwrap();
 
-    let v: [[i32; 2]; 2] = line
-        .split(',')
-        .map(|x| {
-            x.split('-')
-                .map(|y| y.parse::<i32>().unwrap())
-                .collect::<Vec<i32>>()
-                .try_into()
-                .unwrap()
-        })
-        .collect::<Vec<[i32; 2]>>()
+    let y: [usize; 3] = line
+        .split_whitespace()
+        .filter_map(|x| x.parse::<usize>().ok())
+        .collect::<Vec<_>>()
         .try_into()
         .unwrap();
 
-    ((v[1][0] <= v[0][1] && v[0][0] <= v[1][0]) || (v[0][0] <= v[1][1] && v[1][0] <= v[0][0]))
-        as i32
+    let y = y.map(|x| x - 1);
+
+    for _ in 0..=y[0] {
+        let c = stack[y[1]].pop_front().unwrap();
+        stack[y[2]].push_front(c);
+    }
 }
 
-fn get_total_overlap(input: &mut Enumerate<Lines<BufReader<File>>>) -> i32 {
-    input.map(has_overlap).sum()
+fn move_stack(
+    input: &mut Enumerate<Lines<BufReader<File>>>,
+    stack: &mut [VecDeque<char>],
+) -> String {
+    let ap_stack = |x| apply_move(stack, x);
+
+    input.for_each(ap_stack);
+
+    stack.iter().map(|x| x[0]).collect()
 }
 
 fn main() {
     let mut input = get_input();
-    println!("{}", get_total_overlap(&mut input));
+
+    let mut stack: Vec<VecDeque<char>> = parse_stack(&mut input);
+    println!("{}", move_stack(&mut input, &mut stack));
 }
