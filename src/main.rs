@@ -1,10 +1,13 @@
 extern crate core;
 
+use std::collections::{HashSet, VecDeque};
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{BufReader, Lines};
 use std::iter::Enumerate;
 use std::path::Path;
+
+const SIZE: usize = 4;
 
 fn get_input() -> Enumerate<Lines<BufReader<File>>> {
     let path = Path::new("input");
@@ -19,59 +22,30 @@ fn get_input() -> Enumerate<Lines<BufReader<File>>> {
     reader.lines().enumerate()
 }
 
-fn parse_stack(input: &mut Enumerate<Lines<BufReader<File>>>) -> Vec<Vec<char>> {
-    let (_, line) = input.next().unwrap();
+fn check_duplicates(v: VecDeque<char>) -> bool {
+    v.iter().collect::<HashSet<&char>>().len() == SIZE
+}
+
+fn parse_stack((_, line): (usize, Result<String, std::io::Error>)) -> Result<usize, &'static str> {
     let mut line = line.unwrap();
 
-    let size = (line.len() + 1) / 4;
+    let mut v: VecDeque<char> = line.drain(0..SIZE).collect();
+    let mut res = SIZE;
 
-    let mut stack: Vec<Vec<char>> = (0..size).map(|_| Vec::new()).collect();
-
-    while !line.is_empty() {
-        line.chars()
-            .skip(1)
-            .enumerate()
-            .step_by(4)
-            .for_each(|(s, c)| {
-                if c.is_uppercase() {
-                    stack[s / 4].push(c)
-                }
-            });
-
-        line = input.next().unwrap().1.unwrap();
+    for c in line.chars() {
+        res += 1;
+        v.rotate_left(1);
+        v[SIZE - 1] = c;
+        if check_duplicates(v.clone()) {
+            return Ok(res);
+        }
     }
-    stack
-}
 
-fn apply_move(stack: &mut [Vec<char>], (_, line): (usize, Result<String, std::io::Error>)) {
-    let line = line.unwrap();
-
-    let y: [usize; 3] = line
-        .split_whitespace()
-        .filter_map(|x| x.parse::<usize>().ok())
-        .collect::<Vec<_>>()
-        .try_into()
-        .unwrap();
-
-    let y = y.map(|x| x - 1);
-
-    let mut c: Vec<_> = stack[y[1]].drain(..=y[0]).collect();
-    c.append(&mut stack[y[2]]);
-
-    stack[y[2]] = c;
-}
-
-fn move_stack(input: &mut Enumerate<Lines<BufReader<File>>>, stack: &mut [Vec<char>]) -> String {
-    let ap_stack = |x| apply_move(stack, x);
-
-    input.for_each(ap_stack);
-
-    stack.iter().map(|x| x[0]).collect()
+    Err("No start of packet marker.")
 }
 
 fn main() {
     let mut input = get_input();
 
-    let mut stack: Vec<Vec<char>> = parse_stack(&mut input);
-    println!("{}", move_stack(&mut input, &mut stack));
+    println!("{}", parse_stack(input.next().unwrap()).unwrap());
 }
