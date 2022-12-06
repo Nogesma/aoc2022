@@ -7,7 +7,7 @@ use std::io::{BufReader, Lines};
 use std::iter::Enumerate;
 use std::path::Path;
 
-const SIZE: usize = 4;
+const SIZE: usize = 14;
 
 fn get_input() -> Enumerate<Lines<BufReader<File>>> {
     let path = Path::new("input");
