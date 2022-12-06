@@ -1,6 +1,5 @@
 extern crate core;
 
-use std::collections::VecDeque;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{BufReader, Lines};
@@ -20,13 +19,13 @@ fn get_input() -> Enumerate<Lines<BufReader<File>>> {
     reader.lines().enumerate()
 }
 
-fn parse_stack(input: &mut Enumerate<Lines<BufReader<File>>>) -> Vec<VecDeque<char>> {
+fn parse_stack(input: &mut Enumerate<Lines<BufReader<File>>>) -> Vec<Vec<char>> {
     let (_, line) = input.next().unwrap();
     let mut line = line.unwrap();
 
     let size = (line.len() + 1) / 4;
 
-    let mut stack: Vec<VecDeque<char>> = (0..size).map(|_| VecDeque::new()).collect();
+    let mut stack: Vec<Vec<char>> = (0..size).map(|_| Vec::new()).collect();
 
     while !line.is_empty() {
         line.chars()
@@ -35,7 +34,7 @@ fn parse_stack(input: &mut Enumerate<Lines<BufReader<File>>>) -> Vec<VecDeque<ch
             .step_by(4)
             .for_each(|(s, c)| {
                 if c.is_uppercase() {
-                    stack[s / 4].push_back(c)
+                    stack[s / 4].push(c)
                 }
             });
 
@@ -44,7 +43,7 @@ fn parse_stack(input: &mut Enumerate<Lines<BufReader<File>>>) -> Vec<VecDeque<ch
     stack
 }
 
-fn apply_move(stack: &mut [VecDeque<char>], (_, line): (usize, Result<String, std::io::Error>)) {
+fn apply_move(stack: &mut [Vec<char>], (_, line): (usize, Result<String, std::io::Error>)) {
     let line = line.unwrap();
 
     let y: [usize; 3] = line
@@ -56,16 +55,13 @@ fn apply_move(stack: &mut [VecDeque<char>], (_, line): (usize, Result<String, st
 
     let y = y.map(|x| x - 1);
 
-    for _ in 0..=y[0] {
-        let c = stack[y[1]].pop_front().unwrap();
-        stack[y[2]].push_front(c);
-    }
+    let mut c: Vec<_> = stack[y[1]].drain(..=y[0]).collect();
+    c.append(&mut stack[y[2]]);
+
+    stack[y[2]] = c;
 }
 
-fn move_stack(
-    input: &mut Enumerate<Lines<BufReader<File>>>,
-    stack: &mut [VecDeque<char>],
-) -> String {
+fn move_stack(input: &mut Enumerate<Lines<BufReader<File>>>, stack: &mut [Vec<char>]) -> String {
     let ap_stack = |x| apply_move(stack, x);
 
     input.for_each(ap_stack);
@@ -76,6 +72,6 @@ fn move_stack(
 fn main() {
     let mut input = get_input();
 
-    let mut stack: Vec<VecDeque<char>> = parse_stack(&mut input);
+    let mut stack: Vec<Vec<char>> = parse_stack(&mut input);
     println!("{}", move_stack(&mut input, &mut stack));
 }
