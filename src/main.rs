@@ -1,13 +1,11 @@
 extern crate core;
 
-use std::collections::{HashSet, VecDeque};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{BufReader, Lines};
 use std::iter::Enumerate;
 use std::path::Path;
-
-const SIZE: usize = 14;
 
 fn get_input() -> Enumerate<Lines<BufReader<File>>> {
     let path = Path::new("input");
@@ -22,30 +20,91 @@ fn get_input() -> Enumerate<Lines<BufReader<File>>> {
     reader.lines().enumerate()
 }
 
-fn check_duplicates(v: VecDeque<char>) -> bool {
-    v.iter().collect::<HashSet<&char>>().len() == SIZE
-}
+fn build_dir(
+    input: &mut Enumerate<Lines<BufReader<File>>>,
+) -> Result<HashMap<String, usize>, &'static str> {
+    let mut root = HashMap::new();
 
-fn parse_stack((_, line): (usize, Result<String, std::io::Error>)) -> Result<usize, &'static str> {
+    root.insert(Path::new("/").to_str().unwrap().to_string(), 0);
+
+    let mut current = Path::new("/");
+    let (_, line) = input.next().unwrap();
     let mut line = line.unwrap();
+    let mut tmp;
 
-    let mut v: VecDeque<char> = line.drain(0..SIZE).collect();
-    let mut res = SIZE;
+    while !line.is_empty() {
+        if !line.starts_with('$') {
+            return Err("Line doesn't start with $");
+        }
 
-    for c in line.chars() {
-        res += 1;
-        v.rotate_left(1);
-        v[SIZE - 1] = c;
-        if check_duplicates(v.clone()) {
-            return Ok(res);
+        if line.contains("ls") {
+            line = input.next().unwrap().1.unwrap();
+            while !line.starts_with('$') && !line.is_empty() {
+                let attributes: [&str; 2] = line
+                    .split_whitespace()
+                    .collect::<Vec<&str>>()
+                    .try_into()
+                    .unwrap();
+                if !line.starts_with("dir") {
+                    if let Some(x) = root.get_mut(current.to_str().unwrap()) {
+                        *x += attributes[0].parse::<usize>().unwrap();
+                    } else {
+                        return Err("Current path not found in map");
+                    }
+                };
+
+                let input = input.next();
+                if input.is_none() {
+                    return Ok(root);
+                }
+                line = input.unwrap().1.unwrap();
+            }
+        } else if line.contains("cd") {
+            let attributes: [&str; 3] = line
+                .split_whitespace()
+                .collect::<Vec<&str>>()
+                .try_into()
+                .unwrap();
+            if attributes[2].eq("..") {
+                current = current.parent().unwrap_or_else(|| Path::new("/"));
+            } else {
+                tmp = current.join(attributes[2]);
+                current = tmp.as_path();
+
+                root.insert(current.to_str().unwrap().to_string(), 0);
+            }
+
+            line = input.next().unwrap().1.unwrap();
         }
     }
+    Ok(root)
+}
 
-    Err("No start of packet marker.")
+fn get_content_size(current: String, filesystem: &HashMap<String, usize>) -> usize {
+    filesystem.iter().fold(0, |accum, (path, size)| {
+        if Path::new(path).starts_with(current.clone()) {
+            accum + size
+        } else {
+            accum
+        }
+    })
+}
+
+fn get_size(filesystem: &HashMap<String, usize>) -> usize {
+    filesystem.iter().fold(0, |accum, (path, _)| {
+        let size = get_content_size(path.to_string(), filesystem);
+        if size <= 100_000 {
+            accum + size
+        } else {
+            accum
+        }
+    })
 }
 
 fn main() {
     let mut input = get_input();
 
-    println!("{}", parse_stack(input.next().unwrap()).unwrap());
+    let fs = build_dir(&mut input).unwrap();
+
+    println!("{}", get_size(&fs));
 }
