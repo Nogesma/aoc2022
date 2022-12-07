@@ -90,11 +90,11 @@ fn get_content_size(current: String, filesystem: &HashMap<String, usize>) -> usi
     })
 }
 
-fn get_size(filesystem: &HashMap<String, usize>) -> usize {
-    filesystem.iter().fold(0, |accum, (path, _)| {
+fn get_size(filesystem: &HashMap<String, usize>, min: usize) -> usize {
+    filesystem.iter().fold(usize::MAX, |accum, (path, _)| {
         let size = get_content_size(path.to_string(), filesystem);
-        if size <= 100_000 {
-            accum + size
+        if size <= accum && size >= min {
+            size
         } else {
             accum
         }
@@ -106,5 +106,7 @@ fn main() {
 
     let fs = build_dir(&mut input).unwrap();
 
-    println!("{}", get_size(&fs));
+    let needed_space = 30000000 - (70000000 - get_content_size("/".to_string(), &fs));
+
+    println!("{}", get_size(&fs, needed_space));
 }
