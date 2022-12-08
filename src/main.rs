@@ -1,112 +1,62 @@
 extern crate core;
 
-use std::collections::HashMap;
-use std::fs::File;
-use std::io::prelude::*;
-use std::io::{BufReader, Lines};
-use std::iter::Enumerate;
-use std::path::Path;
+use ndarray::iter::LanesMut;
+use ndarray::{Array2, Ix1};
+use std::fs;
 
-fn get_input() -> Enumerate<Lines<BufReader<File>>> {
-    let path = Path::new("input");
-    let display = path.display();
-
-    let file = match File::open(path) {
-        Err(why) => panic!("couldn't open {}: {}", display, why),
-        Ok(file) => file,
-    };
-
-    let reader = BufReader::new(file);
-    reader.lines().enumerate()
-}
-
-fn build_dir(
-    input: &mut Enumerate<Lines<BufReader<File>>>,
-) -> Result<HashMap<String, usize>, &'static str> {
-    let mut root = HashMap::new();
-
-    root.insert(Path::new("/").to_str().unwrap().to_string(), 0);
-
-    let mut current = Path::new("/");
-    let (_, line) = input.next().unwrap();
-    let mut line = line.unwrap();
-    let mut tmp;
-
-    while !line.is_empty() {
-        if !line.starts_with('$') {
-            return Err("Line doesn't start with $");
+fn calculate_trees_for_slice<'a>(
+    mut slice: impl Iterator<Item = (usize, &'a mut (u32, u32))>,
+) -> usize {
+    let mut max = slice.next().unwrap().1 .0;
+    let mut max_index: usize = 0;
+    for (i, (treesize, _discovered)) in slice {
+        if *treesize > max {
+            max = *treesize;
+            max_index = i;
+            *_discovered = 1;
         }
-
-        if line.contains("ls") {
-            line = input.next().unwrap().1.unwrap();
-            while !line.starts_with('$') && !line.is_empty() {
-                let attributes: [&str; 2] = line
-                    .split_whitespace()
-                    .collect::<Vec<&str>>()
-                    .try_into()
-                    .unwrap();
-                if !line.starts_with("dir") {
-                    if let Some(x) = root.get_mut(current.to_str().unwrap()) {
-                        *x += attributes[0].parse::<usize>().unwrap();
-                    } else {
-                        return Err("Current path not found in map");
-                    }
-                };
-
-                let input = input.next();
-                if input.is_none() {
-                    return Ok(root);
-                }
-                line = input.unwrap().1.unwrap();
-            }
-        } else if line.contains("cd") {
-            let attributes: [&str; 3] = line
-                .split_whitespace()
-                .collect::<Vec<&str>>()
-                .try_into()
-                .unwrap();
-            if attributes[2].eq("..") {
-                current = current.parent().unwrap_or_else(|| Path::new("/"));
-            } else {
-                tmp = current.join(attributes[2]);
-                current = tmp.as_path();
-
-                root.insert(current.to_str().unwrap().to_string(), 0);
-            }
-
-            line = input.next().unwrap().1.unwrap();
+        if *treesize == 9 {
+            break;
         }
     }
-    Ok(root)
+    max_index
 }
 
-fn get_content_size(current: String, filesystem: &HashMap<String, usize>) -> usize {
-    filesystem.iter().fold(0, |accum, (path, size)| {
-        if Path::new(path).starts_with(current.clone()) {
-            accum + size
-        } else {
-            accum
-        }
-    })
+fn calculate_trees(slices: LanesMut<(u32, u32), Ix1>) {
+    for mut x in slices {
+        calculate_trees_for_slice(x.indexed_iter_mut());
+        calculate_trees_for_slice(x.iter_mut().rev().enumerate());
+    }
 }
 
-fn get_size(filesystem: &HashMap<String, usize>, min: usize) -> usize {
-    filesystem.iter().fold(usize::MAX, |accum, (path, _)| {
-        let size = get_content_size(path.to_string(), filesystem);
-        if size <= accum && size >= min {
-            size
-        } else {
-            accum
-        }
-    })
+fn get_visible_trees(forest: &mut Array2<(u32, u32)>) -> usize {
+    forest.row_mut(0).map_mut(|mut x| x.1 = 1);
+    forest.row_mut(forest.nrows() - 1).map_mut(|mut x| x.1 = 1);
+    forest.column_mut(0).map_mut(|mut x| x.1 = 1);
+    forest
+        .column_mut(forest.ncols() - 1)
+        .map_mut(|mut x| x.1 = 1);
+
+    calculate_trees(forest.rows_mut());
+    calculate_trees(forest.columns_mut());
+
+    forest.iter().fold(0, |acc, (_, x)| acc + *x as usize)
 }
 
 fn main() {
-    let mut input = get_input();
+    let input = &fs::read_to_string("input").unwrap();
 
-    let fs = build_dir(&mut input).unwrap();
+    let width = input.find('\n').unwrap();
+    let height = input.len() / width - 1;
+    let mut forest: Array2<(u32, u32)> = Array2::from_shape_vec(
+        (width, height),
+        input
+            .chars()
+            .filter_map(|x| x.to_digit(10))
+            .map(|x| (x, 0))
+            .collect::<Vec<(u32, u32)>>(),
+    )
+    .unwrap();
 
-    let needed_space = 30000000 - (70000000 - get_content_size("/".to_string(), &fs));
-
-    println!("{}", get_size(&fs, needed_space));
+    println!("{}", get_visible_trees(&mut forest));
 }
