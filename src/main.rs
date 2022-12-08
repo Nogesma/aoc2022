@@ -1,46 +1,46 @@
 extern crate core;
 
-use ndarray::iter::LanesMut;
-use ndarray::{Array2, Ix1};
+use ndarray::{s, Array2};
 use std::fs;
 
-fn calculate_trees_for_slice<'a>(
-    mut slice: impl Iterator<Item = (usize, &'a mut (u32, u32))>,
-) -> usize {
-    let mut max = slice.next().unwrap().1 .0;
-    let mut max_index: usize = 0;
-    for (i, (treesize, _discovered)) in slice {
-        if *treesize > max {
-            max = *treesize;
-            max_index = i;
-            *_discovered = 1;
-        }
-        if *treesize == 9 {
+fn calculate_visible_trees(size: u32, slice: impl Iterator<Item = (u32, u32)>) -> u32 {
+    let mut visibility = 0;
+    for (tree_size, _) in slice {
+        visibility += 1;
+        if tree_size >= size {
             break;
         }
     }
-    max_index
+    visibility
 }
 
-fn calculate_trees(slices: LanesMut<(u32, u32), Ix1>) {
-    for mut x in slices {
-        calculate_trees_for_slice(x.indexed_iter_mut());
-        calculate_trees_for_slice(x.iter_mut().rev().enumerate());
+fn calculate_visibility(forest: &mut Array2<(u32, u32)>, i: usize, j: usize) {
+    forest[[i, j]].1 *= calculate_visible_trees(
+        forest[[i, j]].0,
+        forest.slice(s![..i, j]).iter().rev().cloned(),
+    );
+    forest[[i, j]].1 *= calculate_visible_trees(
+        forest[[i, j]].0,
+        forest.slice(s![i + 1.., j]).iter().cloned(),
+    );
+    forest[[i, j]].1 *= calculate_visible_trees(
+        forest[[i, j]].0,
+        forest.slice(s![i, ..j]).iter().rev().cloned(),
+    );
+    forest[[i, j]].1 *= calculate_visible_trees(
+        forest[[i, j]].0,
+        forest.slice(s![i, j + 1..]).iter().cloned(),
+    );
+}
+
+fn get_visible_trees(forest: &mut Array2<(u32, u32)>) -> u32 {
+    for i in 1..forest.nrows() - 1 {
+        for j in 1..forest.ncols() - 1 {
+            calculate_visibility(forest, i, j);
+        }
     }
-}
 
-fn get_visible_trees(forest: &mut Array2<(u32, u32)>) -> usize {
-    forest.row_mut(0).map_mut(|mut x| x.1 = 1);
-    forest.row_mut(forest.nrows() - 1).map_mut(|mut x| x.1 = 1);
-    forest.column_mut(0).map_mut(|mut x| x.1 = 1);
-    forest
-        .column_mut(forest.ncols() - 1)
-        .map_mut(|mut x| x.1 = 1);
-
-    calculate_trees(forest.rows_mut());
-    calculate_trees(forest.columns_mut());
-
-    forest.iter().fold(0, |acc, (_, x)| acc + *x as usize)
+    *forest.map(|(_, x)| *x).iter().max().unwrap()
 }
 
 fn main() {
@@ -53,7 +53,7 @@ fn main() {
         input
             .chars()
             .filter_map(|x| x.to_digit(10))
-            .map(|x| (x, 0))
+            .map(|x| (x, 1))
             .collect::<Vec<(u32, u32)>>(),
     )
     .unwrap();
