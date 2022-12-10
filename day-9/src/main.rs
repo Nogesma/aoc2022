@@ -1,62 +1,78 @@
 extern crate core;
 
-use ndarray::{s, Array2};
+use nalgebra::Point2;
+use std::cmp::Ordering;
+use std::collections::HashSet;
 use std::fs;
 
-fn calculate_visible_trees(size: u32, slice: impl Iterator<Item = (u32, u32)>) -> u32 {
-    let mut visibility = 0;
-    for (tree_size, _) in slice {
-        visibility += 1;
-        if tree_size >= size {
-            break;
-        }
-    }
-    visibility
+/* Part I */
+// const SIZE: usize = 2;
+
+/* Part II */
+const SIZE: usize = 10;
+
+fn is_touching(head: &Point2<i32>, tail: &Point2<i32>) -> bool {
+    (((tail.x - head.x).pow(2) + (tail.y - head.y).pow(2)) as f32).sqrt() < 2.0
 }
 
-fn calculate_visibility(forest: &mut Array2<(u32, u32)>, i: usize, j: usize) {
-    forest[[i, j]].1 *= calculate_visible_trees(
-        forest[[i, j]].0,
-        forest.slice(s![..i, j]).iter().rev().cloned(),
-    );
-    forest[[i, j]].1 *= calculate_visible_trees(
-        forest[[i, j]].0,
-        forest.slice(s![i + 1.., j]).iter().cloned(),
-    );
-    forest[[i, j]].1 *= calculate_visible_trees(
-        forest[[i, j]].0,
-        forest.slice(s![i, ..j]).iter().rev().cloned(),
-    );
-    forest[[i, j]].1 *= calculate_visible_trees(
-        forest[[i, j]].0,
-        forest.slice(s![i, j + 1..]).iter().cloned(),
-    );
-}
+fn follow_head(knots: &mut [Point2<i32>; SIZE]) {
+    for i in 0..SIZE - 1 {
+        if is_touching(&knots[i], &knots[i + 1]) {
+            return;
+        }
 
-fn get_visible_trees(forest: &mut Array2<(u32, u32)>) -> u32 {
-    for i in 1..forest.nrows() - 1 {
-        for j in 1..forest.ncols() - 1 {
-            calculate_visibility(forest, i, j);
+        match knots[i + 1].x.cmp(&knots[i].x) {
+            Ordering::Greater => knots[i + 1].x -= 1,
+            Ordering::Less => knots[i + 1].x += 1,
+            Ordering::Equal => {}
+        }
+
+        match knots[i + 1].y.cmp(&knots[i].y) {
+            Ordering::Greater => knots[i + 1].y -= 1,
+            Ordering::Less => knots[i + 1].y += 1,
+            Ordering::Equal => {}
         }
     }
+}
 
-    *forest.map(|(_, x)| *x).iter().max().unwrap()
+fn apply_move(m: &str, knots: &mut [Point2<i32>; SIZE]) -> Result<(), &'static str> {
+    match m {
+        "U" => knots[0].y += 1,
+        "R" => knots[0].x += 1,
+        "L" => knots[0].x -= 1,
+        "D" => knots[0].y -= 1,
+        _ => return Err("Move not recognised"),
+    }
+
+    follow_head(knots);
+
+    Ok(())
+}
+
+fn part_1(input: &str) -> usize {
+    let mut knots: [Point2<i32>; SIZE] = [Point2::origin(); SIZE];
+
+    let mut visited: HashSet<Point2<i32>> = HashSet::new();
+    visited.insert(*knots.last().unwrap());
+
+    let lines = input
+        .split('\n')
+        .filter(|x| !x.is_empty())
+        .collect::<Vec<&str>>();
+
+    for line in lines {
+        let (m, n) = line.split_once(' ').unwrap();
+
+        for _ in 0..n.parse().unwrap() {
+            apply_move(m, &mut knots).unwrap();
+            visited.insert(*knots.last().unwrap());
+        }
+    }
+    visited.len()
 }
 
 fn main() {
     let input = &fs::read_to_string("input").unwrap();
 
-    let width = input.find('\n').unwrap();
-    let height = input.len() / width - 1;
-    let mut forest: Array2<(u32, u32)> = Array2::from_shape_vec(
-        (width, height),
-        input
-            .chars()
-            .filter_map(|x| x.to_digit(10))
-            .map(|x| (x, 1))
-            .collect::<Vec<(u32, u32)>>(),
-    )
-    .unwrap();
-
-    println!("{}", get_visible_trees(&mut forest));
+    println!("{}", part_1(input));
 }
