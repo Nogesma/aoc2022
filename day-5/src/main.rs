@@ -30,7 +30,7 @@ fn parse_stack(input: &str) -> (Vec<Vec<char>>, Vec<usize>) {
     (stack, stack_len)
 }
 
-fn apply_move(stack: &mut [Vec<char>], len: &mut [usize], line: &str) {
+fn apply_move(stack: &mut [Vec<char>], len: &mut [usize], line: &str, p1: bool) {
     let y = line
         .split_whitespace()
         .filter_map(|x| x.parse::<usize>().ok());
@@ -40,7 +40,9 @@ fn apply_move(stack: &mut [Vec<char>], len: &mut [usize], line: &str) {
     let i = len[y[1]];
     let j = len[y[2]];
 
-    stack[y[1]][i - y[0] - 1..i].reverse();
+    if p1 {
+        stack[y[1]][i - y[0] - 1..i].reverse();
+    }
 
     let e = stack[y[1]][i - y[0] - 1..i].to_vec();
 
@@ -50,11 +52,11 @@ fn apply_move(stack: &mut [Vec<char>], len: &mut [usize], line: &str) {
     len[y[2]] += y[0] + 1;
 }
 
-fn move_stack(input: &str, stack: &mut [Vec<char>], len: &mut [usize]) -> String {
+fn move_stack(input: &str, stack: &mut [Vec<char>], len: &mut [usize], p1: bool) -> String {
     let input = input.split('\n');
 
     for s in input.filter(|x| !x.is_empty()) {
-        apply_move(stack, len, s);
+        apply_move(stack, len, s, p1);
     }
 
     stack
@@ -75,7 +77,14 @@ fn main() {
 
     let (stack, moves) = file.split_once("\n\n").unwrap();
 
-    let (mut stack, mut len) = parse_stack(stack);
+    let (stack, len) = parse_stack(stack);
 
-    println!("{}", move_stack(moves, &mut stack, &mut len));
+    println!(
+        "Part 1: {}",
+        move_stack(moves, &mut stack.clone(), &mut len.clone(), true)
+    );
+    println!(
+        "Part 2: {}",
+        move_stack(moves, &mut stack.clone(), &mut len.clone(), false)
+    );
 }
