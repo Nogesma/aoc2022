@@ -61,4 +61,5 @@ fn main() {
         }
         print!("{}", c);
     }
+    println!();
 }

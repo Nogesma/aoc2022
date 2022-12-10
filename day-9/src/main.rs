@@ -5,18 +5,12 @@ use std::cmp::Ordering;
 use std::collections::HashSet;
 use std::fs;
 
-/* Part I */
-// const SIZE: usize = 2;
-
-/* Part II */
-const SIZE: usize = 10;
-
 fn is_touching(head: &Point2<i32>, tail: &Point2<i32>) -> bool {
     (((tail.x - head.x).pow(2) + (tail.y - head.y).pow(2)) as f32).sqrt() < 2.0
 }
 
-fn follow_head(knots: &mut [Point2<i32>; SIZE]) {
-    for i in 0..SIZE - 1 {
+fn follow_head(knots: &mut Vec<Point2<i32>>) {
+    for i in 0..knots.len() - 1 {
         if is_touching(&knots[i], &knots[i + 1]) {
             return;
         }
@@ -35,7 +29,7 @@ fn follow_head(knots: &mut [Point2<i32>; SIZE]) {
     }
 }
 
-fn apply_move(m: &str, knots: &mut [Point2<i32>; SIZE]) -> Result<(), &'static str> {
+fn apply_move(m: &str, knots: &mut Vec<Point2<i32>>) -> Result<(), &'static str> {
     match m {
         "U" => knots[0].y += 1,
         "R" => knots[0].x += 1,
@@ -49,8 +43,8 @@ fn apply_move(m: &str, knots: &mut [Point2<i32>; SIZE]) -> Result<(), &'static s
     Ok(())
 }
 
-fn part_1(input: &str) -> usize {
-    let mut knots: [Point2<i32>; SIZE] = [Point2::origin(); SIZE];
+fn move_rope(input: &str, size: usize) -> usize {
+    let mut knots: Vec<Point2<i32>> = (0..size).map(|_| Point2::origin()).collect();
 
     let mut visited: HashSet<Point2<i32>> = HashSet::new();
     visited.insert(*knots.last().unwrap());
@@ -74,5 +68,6 @@ fn part_1(input: &str) -> usize {
 fn main() {
     let input = &fs::read_to_string("input").unwrap();
 
-    println!("{}", part_1(input));
+    println!("Part 1: {}", move_rope(input, 2));
+    println!("Part 2: {}", move_rope(input, 10));
 }
