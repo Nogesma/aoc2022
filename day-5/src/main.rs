@@ -77,14 +77,11 @@ fn main() {
 
     let (stack, moves) = file.split_once("\n\n").unwrap();
 
-    let (stack, len) = parse_stack(stack);
+    let (mut stack, mut len) = parse_stack(stack);
 
     println!(
         "Part 1: {}",
         move_stack(moves, &mut stack.clone(), &mut len.clone(), true)
     );
-    println!(
-        "Part 2: {}",
-        move_stack(moves, &mut stack.clone(), &mut len.clone(), false)
-    );
+    println!("Part 2: {}", move_stack(moves, &mut stack, &mut len, false));
 }

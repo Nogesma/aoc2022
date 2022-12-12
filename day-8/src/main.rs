@@ -9,13 +9,13 @@ fn calculate_trees_in_dir<'a>(
 ) -> usize {
     let mut max = slice.next().unwrap().1 .0;
     let mut max_index: usize = 0;
-    for (i, (treesize, _discovered)) in slice {
-        if *treesize > max {
-            max = *treesize;
+    for (i, (tree_size, _discovered)) in slice {
+        if *tree_size > max {
+            max = *tree_size;
             max_index = i;
             *_discovered = 1;
         }
-        if *treesize == 9 {
+        if *tree_size == 9 {
             break;
         }
     }
@@ -78,7 +78,7 @@ fn main() {
     let width = input.find('\n').unwrap();
     let height = input.len() / width - 1;
 
-    let forest: Array2<(u32, u32)> = Array2::from_shape_vec(
+    let mut forest: Array2<(u32, u32)> = Array2::from_shape_vec(
         (width, height),
         input
             .chars()
@@ -89,5 +89,5 @@ fn main() {
     .unwrap();
 
     println!("Part 1: {}", p1(&mut forest.clone()));
-    println!("Part 2: {}", p2(&mut forest.clone()));
+    println!("Part 2: {}", p2(&mut forest));
 }

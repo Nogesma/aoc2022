@@ -18,12 +18,12 @@ fn get_last_number(str: &str) -> Result<usize, std::num::ParseIntError> {
 
 fn get_monkeys(input: &str) -> Result<Vec<Monkey>, &'static str> {
     let mut lines = input.split('\n');
-    let mut mnks = Vec::new();
+    let mut monkeys = Vec::new();
 
     loop {
         let x = lines.next();
         if x.is_none() {
-            return Ok(mnks);
+            return Ok(monkeys);
         }
         let mut line = lines.next().unwrap();
         let (_, items) = line.split_once(':').unwrap();
@@ -43,13 +43,13 @@ fn get_monkeys(input: &str) -> Result<Vec<Monkey>, &'static str> {
         let test: [usize; 3] = (0..3)
             .map(|_| {
                 line = lines.next().unwrap();
-                return get_last_number(line).unwrap();
+                get_last_number(line).unwrap()
             })
             .collect::<Vec<usize>>()
             .try_into()
             .unwrap();
 
-        mnks.push(Monkey {
+        monkeys.push(Monkey {
             items,
             operation,
             test,
@@ -69,7 +69,11 @@ fn apply_op(item: u64, (op, x): (char, u64)) -> Option<u64> {
 }
 
 fn test(worry: u64, [div, m1, m2]: [usize; 3]) -> usize {
-    return if worry as usize % div == 0 { m1 } else { m2 };
+    if worry as usize % div == 0 {
+        m1
+    } else {
+        m2
+    }
 }
 
 fn worry_a_lot(monkeys: &mut [Monkey], modulo: u64) {
