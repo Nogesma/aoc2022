@@ -14,18 +14,20 @@
       <sourceFolder url="file://$MODULE_DIR$/day10/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/day11/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/day12/src" isTestSource="false" />
-      <excludeFolder url="file://$MODULE_DIR$/day01/target" />
-      <excludeFolder url="file://$MODULE_DIR$/day02/target" />
-      <excludeFolder url="file://$MODULE_DIR$/day03/target" />
-      <excludeFolder url="file://$MODULE_DIR$/day04/target" />
-      <excludeFolder url="file://$MODULE_DIR$/day05/target" />
-      <excludeFolder url="file://$MODULE_DIR$/day06/target" />
-      <excludeFolder url="file://$MODULE_DIR$/day07/target" />
-      <excludeFolder url="file://$MODULE_DIR$/day08/target" />
+      <sourceFolder url="file://$MODULE_DIR$/day13/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/day09/target" />
+      <excludeFolder url="file://$MODULE_DIR$/day02/target" />
+      <excludeFolder url="file://$MODULE_DIR$/day08/target" />
+      <excludeFolder url="file://$MODULE_DIR$/day04/target" />
       <excludeFolder url="file://$MODULE_DIR$/day10/target" />
-      <excludeFolder url="file://$MODULE_DIR$/day11/target" />
       <excludeFolder url="file://$MODULE_DIR$/day12/target" />
+      <excludeFolder url="file://$MODULE_DIR$/day06/target" />
+      <excludeFolder url="file://$MODULE_DIR$/day05/target" />
+      <excludeFolder url="file://$MODULE_DIR$/day11/target" />
+      <excludeFolder url="file://$MODULE_DIR$/day07/target" />
+      <excludeFolder url="file://$MODULE_DIR$/day01/target" />
+      <excludeFolder url="file://$MODULE_DIR$/day03/target" />
+      <excludeFolder url="file://$MODULE_DIR$/day13/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
