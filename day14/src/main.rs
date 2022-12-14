@@ -12,8 +12,6 @@ enum Materials {
     Sand,
 }
 
-const MIN: usize = 400;
-
 fn parse_pos(input: Option<&str>) -> Option<(usize, usize)> {
     let (a, b) = input?.split_once(',')?;
 
@@ -47,7 +45,6 @@ fn parse_map(input: &str) -> Vec<Vec<Materials>> {
     let mut map = vec![vec![]];
 
     for line in lines {
-        println!("{}", line);
         if line.is_empty() {
             return map;
         }
@@ -57,11 +54,9 @@ fn parse_map(input: &str) -> Vec<Vec<Materials>> {
         while !pos.is_empty() {
             let next = parse_pos(pos.pop()).unwrap();
 
-            println!("{:?} -> {:?}", curr, next);
             for i in range_inclusive(curr.1, next.1) {
-                println!("i: {}", i);
                 set_min_height(&mut map, i);
-                for j in range_inclusive(curr.0 - MIN, next.0 - MIN) {
+                for j in range_inclusive(curr.0, next.0) {
                     set_min_width(&mut map[i], j);
                     map[i][j] = Materials::Rock;
                 }
@@ -74,15 +69,22 @@ fn parse_map(input: &str) -> Vec<Vec<Materials>> {
 }
 
 fn normalize_map(map: &mut Vec<Vec<Materials>>) {
-    let max = map.iter().fold(0, |accum, v| max(accum, v.len())) + 2;
+    let max = map.iter().fold(0, |accum, v| max(accum, v.len())) * 3 / 2;
 
+    map.push(Vec::new());
     map.push(Vec::new());
     for i in 0..map.len() {
         set_min_width(&mut map[i], max);
     }
+
+    let len = map.len() - 1;
+    for i in 0..map[len].len() {
+        map[len][i] = Materials::Rock;
+    }
 }
 
-fn print_map(map: &Vec<Vec<Materials>>) {
+fn _print_map(map: &Vec<Vec<Materials>>) {
+    sleep(Duration::from_millis(50));
     print!("{}[2J", 27 as char);
     for i in map {
         for j in i {
@@ -96,19 +98,21 @@ fn print_map(map: &Vec<Vec<Materials>>) {
     }
 }
 
-fn drop_sand(map: &mut Vec<Vec<Materials>>) {
+fn drop_sand(map: &mut Vec<Vec<Materials>>) -> (i32, i32) {
+    let mut p1 = 0;
     loop {
-        let (mut i, mut j) = (0, 500 - MIN);
+        let (mut i, mut j) = (0, 500);
+
+        if map[i][j] == Materials::Sand {
+            return (p1, count_sand(map));
+        }
 
         map[i][j] = Materials::Sand;
         let mut is_stopped = false;
         while !is_stopped {
-            // sleep(Duration::from_millis(0));
-            // print_map(map);
-
-            if i == map.len() - 1 {
-                map[i][j] = Materials::Air;
-                return;
+            // _print_map(map);
+            if i == map.len() - 2 && p1 == 0 {
+                p1 = count_sand(map) - 1;
             }
 
             if map[i + 1][j] == Materials::Air {
@@ -132,20 +136,23 @@ fn drop_sand(map: &mut Vec<Vec<Materials>>) {
     }
 }
 
+fn count_sand(map: &[Vec<Materials>]) -> i32 {
+    map.iter().fold(0, |accum, v| {
+        accum
+            + v.iter()
+                .fold(0, |a, m| if *m == Materials::Sand { a + 1 } else { a })
+    })
+}
+
 fn main() {
     let input = &fs::read_to_string("input").unwrap();
 
     let mut map = parse_map(input);
 
     normalize_map(&mut map);
-    // println!("{:?}", map);
-    drop_sand(&mut map);
 
-    let res = map.iter().fold(0, |accum, v| {
-        accum
-            + v.iter()
-                .fold(0, |a, m| if *m == Materials::Sand { a + 1 } else { a })
-    });
+    let (p1, p2) = drop_sand(&mut map);
 
-    println!("Part 1: {}", res);
+    println!("Part 1: {}", p1);
+    println!("Part 2: {}", p2);
 }
