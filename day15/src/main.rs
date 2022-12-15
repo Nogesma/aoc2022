@@ -2,6 +2,7 @@ extern crate core;
 
 use std::collections::HashSet;
 use std::fs;
+use std::ops::Range;
 
 #[derive(Debug)]
 struct Sensor {
@@ -33,7 +34,7 @@ fn parse(input: &str) -> (Vec<Sensor>, HashSet<[i32; 2]>) {
         beacons.insert([bx, by]);
         sensors.push(Sensor {
             pos: [x, y],
-            distance: calculate_manhatan_distance(&[x, y], &[bx, by]) + 1,
+            distance: calculate_manhatan_distance(&[x, y], &[bx, by]),
         });
     }
     (sensors, beacons)
@@ -83,7 +84,7 @@ fn p1(sensors: &Vec<Sensor>, beacons: &HashSet<[i32; 2]>) -> i32 {
     'x: while x <= max {
         for sensor in sensors {
             let distance =
-                sensor.distance - calculate_manhatan_distance(&sensor.pos, &[x, 2_000_000]);
+                sensor.distance - calculate_manhatan_distance(&sensor.pos, &[x, 2_000_000]) + 1;
             if distance > 0 {
                 x += distance;
                 continue 'x;
@@ -105,23 +106,57 @@ fn p1(sensors: &Vec<Sensor>, beacons: &HashSet<[i32; 2]>) -> i32 {
     sum_of_ranges(&vec) - res
 }
 
+fn gap_in_ranges(ranges: &mut Vec<Range<i32>>) -> i32 {
+    ranges.sort_by(|a, b| a.end.cmp(&b.end));
+
+    let mut stack: Vec<Range<i32>> = vec![ranges.pop().unwrap()];
+    let mut last = stack.last_mut().unwrap();
+    for i in (0..ranges.len()).rev() {
+        if last.start < ranges[i].end {
+            if last.start > ranges[i].start {
+                last.start = ranges[i].start;
+            }
+        } else {
+            stack.push(ranges[i].clone());
+            last = stack.last_mut().unwrap();
+        }
+    }
+
+    if stack.len() > 1 {
+        if stack[1].end < stack[0].start {
+            return stack[1].end;
+        }
+        if stack[1].start > 0 {
+            return stack[1].start - 1;
+        }
+        if stack[0].end < LINE {
+            return stack[0].end;
+        }
+    }
+
+    0
+}
+
 const LINE: i32 = 4_000_000;
 
 fn p2(sensors: &Vec<Sensor>) -> usize {
-    let mut x = 0;
     let mut y = 0;
+    let mut x = 0;
+    let mut ranges: Vec<Range<i32>> = Vec::with_capacity(sensors.len());
     'y: while y < LINE {
-        x = 0;
-        'x: while x < LINE {
-            for sensor in sensors {
-                let distance = sensor.distance - calculate_manhatan_distance(&sensor.pos, &[x, y]);
-                if distance > 0 {
-                    x += distance;
-                    continue 'x;
-                }
+        for sensor in sensors {
+            let distance =
+                sensor.distance - calculate_manhatan_distance(&sensor.pos, &[sensor.pos[0], y]);
+
+            if distance >= 0 {
+                ranges.push(sensor.pos[0] - distance..sensor.pos[0] + distance + 1);
             }
+        }
+        x = gap_in_ranges(&mut ranges);
+        if x != 0 {
             break 'y;
         }
+        ranges.clear();
         y += 1;
     }
     x as usize * LINE as usize + y as usize
