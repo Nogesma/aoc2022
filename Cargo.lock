@@ -21,6 +21,7 @@ dependencies = [
  "day13",
  "day14",
  "day15",
+ "day16",
  "libc",
 ]
 
@@ -115,10 +116,24 @@ name = "day15"
 version = "0.1.0"
 
 [[package]]
+name = "day16"
+version = "0.1.0"
+dependencies = [
+ "memoize",
+ "ndarray",
+]
+
+[[package]]
 name = "json"
 version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
+
+[[package]]
+name = "lazy_static"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
@@ -133,6 +148,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "add85d4dd35074e6fedc608f8c8f513a3548619a9024b751949ef0e8e45a4d84"
 dependencies = [
  "rawpointer",
+]
+
+[[package]]
+name = "memoize"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c25d125e4063f313300d87c8f658e5b3d69257095df9a4221c12ba50b0421bff"
+dependencies = [
+ "lazy_static",
+ "memoize-inner",
+]
+
+[[package]]
+name = "memoize-inner"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8b7d5160e6ffcc59d4c571c38238ec5b7065bc91a5a24f511988dabcddda723"
+dependencies = [
+ "lazy_static",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

@@ -73,8 +73,9 @@ fn normalize_map(map: &mut Vec<Vec<Materials>>) {
 
     map.push(Vec::new());
     map.push(Vec::new());
-    for i in 0..map.len() {
-        set_min_width(&mut map[i], max);
+
+    for v in &mut *map {
+        set_min_width(v, max);
     }
 
     let len = map.len() - 1;

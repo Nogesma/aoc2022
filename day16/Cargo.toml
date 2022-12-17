@@ -1,0 +1,11 @@
+[package]
+name = "day16"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "day16"
+
+[dependencies]
+memoize = "0.3.3"
+ndarray = "0.15.6"
