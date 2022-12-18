@@ -31,7 +31,7 @@ fn get_total_overlap(input: &str) -> (i32, i32) {
         .fold((0, 0), |(a, b), (x, y)| (a + x, b + y))
 }
 
-pub fn day04() {
+pub fn main() {
     let input = &fs::read_to_string("day04/input").unwrap();
 
     let res = get_total_overlap(input);

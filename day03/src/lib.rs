@@ -44,7 +44,7 @@ fn p2(input: &str) -> i32 {
     total
 }
 
-pub fn day03() {
+pub fn main() {
     let input = &fs::read_to_string("day03/input").unwrap();
 
     println!("Part 1: {}", p1(input));

@@ -22,6 +22,7 @@ dependencies = [
  "day14",
  "day15",
  "day16",
+ "day17",
  "libc",
 ]
 
@@ -122,6 +123,10 @@ dependencies = [
  "memoize",
  "ndarray",
 ]
+
+[[package]]
+name = "day17"
+version = "0.1.0"
 
 [[package]]
 name = "json"

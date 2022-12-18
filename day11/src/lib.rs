@@ -113,7 +113,7 @@ fn throw_items(monkeys: Vec<Monkey>, modulo: u64) -> (u64, u64) {
     (get_inspections(&p1), get_inspections(&p2))
 }
 
-pub fn day11() {
+pub fn main() {
     let input = &fs::read_to_string("day11/input").unwrap();
 
     let monkeys: Vec<Monkey> = get_monkeys(input).unwrap();

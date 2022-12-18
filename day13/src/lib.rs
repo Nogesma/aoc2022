@@ -81,7 +81,7 @@ fn p2(input: &str) -> usize {
     })
 }
 
-pub fn day13() {
+pub fn main() {
     let input = &fs::read_to_string("day13/input").unwrap();
 
     println!("Part 1: {}", p1(input));

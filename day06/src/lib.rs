@@ -24,7 +24,7 @@ fn parse_stack(line: &str, size: usize) -> Option<usize> {
     None
 }
 
-pub fn day06() {
+pub fn main() {
     let input = &fs::read_to_string("day06/input").unwrap();
 
     println!("Part 1: {}", parse_stack(input, 4).unwrap_or_default());

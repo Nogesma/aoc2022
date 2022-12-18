@@ -162,7 +162,7 @@ fn p2(sensors: &Vec<Sensor>) -> usize {
     x as usize * LINE as usize + y as usize
 }
 
-pub fn day15() {
+pub fn main() {
     let input = &fs::read_to_string("day15/input").unwrap();
 
     let (sensors, beacons) = parse(input);

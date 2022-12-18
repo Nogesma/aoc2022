@@ -94,7 +94,7 @@ fn p2(filesystem: &HashMap<String, usize>, min: usize) -> usize {
     })
 }
 
-pub fn day07() {
+pub fn main() {
     let input = &fs::read_to_string("day07/input").unwrap();
 
     let fs = build_dir(input).unwrap();

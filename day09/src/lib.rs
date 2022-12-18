@@ -65,7 +65,7 @@ fn move_rope(input: &str, size: usize) -> usize {
     visited.len()
 }
 
-pub fn day09() {
+pub fn main() {
     let input = &fs::read_to_string("day09/input").unwrap();
 
     println!("Part 1: {}", move_rope(input, 2));

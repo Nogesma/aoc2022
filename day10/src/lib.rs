@@ -48,7 +48,7 @@ fn part_1(input: &str) -> (i32, [char; SCREEN_SIZE]) {
     (sum, screen)
 }
 
-pub fn day10() {
+pub fn main() {
     let input = &fs::read_to_string("day10/input").unwrap();
 
     let (sum, screen) = part_1(input);

@@ -102,7 +102,7 @@ fn dfs2(
     }
 }
 
-pub fn day16() {
+pub fn main() {
     let input = &fs::read_to_string("day16/input").unwrap();
 
     let valves = parse(input);
@@ -141,17 +141,4 @@ pub fn day16() {
         "Part 2: {}",
         dfs2(start_idx, pressure_valves, 26, &dist, &flows).0
     );
-
-    // println!("{:?}", x);
-
-    // let routes = get_routes(&valves, &pressured_valves);
-
-    // println!("{:?}", routes.get("EECC"));
-    // println!("{:?}", routes);
-    // println!(
-    //     "{}",
-    //     navigate_pipes(&valves, &routes, &pressured_valves, "AA")
-    // );
-    // println!("Part 1: {}", p1(&sensors, &beacons));
-    // println!("Part 2: {}", p2(&sensors));
 }

@@ -72,7 +72,7 @@ fn move_stack(input: &str, stack: &mut [Vec<char>], len: &mut [usize], p1: bool)
         .collect()
 }
 
-pub fn day05() {
+pub fn main() {
     let file = &fs::read_to_string("day05/input").unwrap();
 
     let (stack, moves) = file.split_once("\n\n").unwrap();

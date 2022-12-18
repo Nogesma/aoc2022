@@ -20,7 +20,7 @@ fn get_max_calories(input: &str) -> [i32; 3] {
     max_cals
 }
 
-pub fn day01() {
+pub fn main() {
     let input = &fs::read_to_string("day01/input").unwrap();
 
     let cals = get_max_calories(input);

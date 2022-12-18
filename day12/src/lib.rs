@@ -130,7 +130,7 @@ fn navigate_map(map: &mut Vec<Vec<Point>>, pos: [usize; 2]) -> Result<(i32, i32)
     Err("No path found.")
 }
 
-pub fn day12() {
+pub fn main() {
     let input = &fs::read_to_string("day12/input").unwrap();
 
     let (mut map, end) = get_map(input).unwrap();

@@ -145,7 +145,7 @@ fn count_sand(map: &[Vec<Materials>]) -> i32 {
     })
 }
 
-pub fn day14() {
+pub fn main() {
     let input = &fs::read_to_string("day14/input").unwrap();
 
     let mut map = parse_map(input);

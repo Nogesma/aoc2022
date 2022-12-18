@@ -72,7 +72,7 @@ fn p2(forest: &mut Array2<(u32, u32)>) -> u32 {
     *forest.map(|(_, x)| *x).iter().max().unwrap()
 }
 
-pub fn day08() {
+pub fn main() {
     let input = &fs::read_to_string("day08/input").unwrap();
 
     let width = input.find('\n').unwrap();
