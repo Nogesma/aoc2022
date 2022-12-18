@@ -62,13 +62,20 @@ fn main() {
             let durations = days.iter().map(parse);
             eprintln!("\nTotal: {:?}", durations.sum::<Duration>());
         }
-        "bench" => unsafe {
-            close(1);
+        "bench" => {
+            unsafe {
+                close(1);
+            }
 
-            let durations = (0..10).flat_map(|_| days.iter().map(parse));
+            eprintln!("Warning: average without day16, as it is using memoize");
+            let durations = (0..10).flat_map(|_| {
+                days.iter()
+                    .filter(|&x| x != &"day16".to_string())
+                    .map(parse)
+            });
 
             eprintln!("Average: {:?}", durations.sum::<Duration>() / 10);
-        },
+        }
         _ => {
             parse(v);
         }

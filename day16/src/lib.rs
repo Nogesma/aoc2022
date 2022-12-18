@@ -72,6 +72,12 @@ fn dfs(
     }
 }
 
+#[memoize]
+unsafe fn sum_flows(rest: Vec<usize>, flows: *const Vec<u32>) -> u32 {
+    let flows: &Vec<u32> = &*flows;
+    rest.iter().map(|&x| flows[x]).sum::<u32>()
+}
+
 fn dfs2(
     cur: usize,
     rest: Vec<usize>,
@@ -86,15 +92,18 @@ fn dfs2(
         rest.iter()
             .enumerate()
             .map(|(idx, &v)| {
-                if dist[[cur, v]] < t {
-                    let mut rest = rest.clone();
+                let mut rest = rest.clone();
+                if dist[[cur, v]] < t && sum_flows(rest.clone(), flows) / t < 12 {
                     rest.remove(idx);
                     let (a, b) = dfs2(v, rest, t - dist[[cur, v]] - 1, dist, flows);
-
+                    let x = flows[v] * (t - dist[[cur, v]] - 1);
+                    if a == 0 {
+                        return (x, b);
+                    }
                     let (c, d) = dfs(3, b, 26, dist, flows);
-                    (flows[v] * (t - dist[[cur, v]] - 1) + a + c, d)
+                    (x + a + c, d)
                 } else {
-                    (0, rest.clone())
+                    (0, rest)
                 }
             })
             .max()
@@ -131,6 +140,8 @@ pub fn main() {
         .collect::<Vec<usize>>();
 
     let flows = valves.iter().map(|v| v.flow).collect::<Vec<u32>>();
+
+    println!("{}", flows.clone().into_iter().sum::<u32>());
 
     println!(
         "Part 1: {}",
