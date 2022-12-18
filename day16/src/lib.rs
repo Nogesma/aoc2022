@@ -152,4 +152,7 @@ pub fn main() {
         "Part 2: {}",
         dfs2(start_idx, pressure_valves, 26, &dist, &flows).0
     );
+
+    // Flush cache for benchmark
+    memoized_flush_dfs();
 }
