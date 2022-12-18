@@ -46,14 +46,14 @@ fn can_drop(map: &[u8], rock: &[u8; 4], pos: usize) -> bool {
 }
 
 fn stop(map: &mut [u8], rock: &[u8; 4], pos: usize) -> usize {
-    let mut full_line = 0;
+    let mut ref_line = 0;
     for i in 0..rock.len() {
         map[pos + i] |= rock[i];
-        if map[pos + i] == 0b1111111 {
-            full_line = pos + i
+        if map[pos + i] == map[1] {
+            ref_line = pos + i
         }
     }
-    full_line
+    ref_line
 }
 
 fn _print_map(map: &[u8]) {
@@ -89,11 +89,11 @@ fn tetris(
     mut jets: impl PeekableIterator<Item = (usize, char)>,
 ) -> usize {
     let mut state: HashMap<u64, (usize, usize)> = HashMap::new();
-    let mut full_line = 0;
+    let mut ref_line = 0;
     for idx in 0..cycles {
         let highest_rock = map.len() - 1 - map.iter().rev().position(|&x| x > 0).unwrap();
         let mut s = DefaultHasher::new();
-        (shapes.peek(), jets.peek(), highest_rock - full_line + 1).hash(&mut s);
+        (shapes.peek(), jets.peek(), highest_rock - ref_line + 1).hash(&mut s);
         let hash = s.finish();
 
         let x = state.get_mut(&hash);
@@ -132,7 +132,7 @@ fn tetris(
             } else {
                 let tmp = stop(map, &rock, pos);
                 if tmp != 0 {
-                    full_line = tmp;
+                    ref_line = tmp;
                 }
                 break;
             }
