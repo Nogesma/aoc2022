@@ -26,6 +26,7 @@ dependencies = [
  "day18",
  "day19",
  "day20",
+ "day21",
  "libc",
 ]
 
@@ -141,6 +142,10 @@ version = "0.1.0"
 
 [[package]]
 name = "day20"
+version = "0.1.0"
+
+[[package]]
+name = "day21"
 version = "0.1.0"
 
 [[package]]
