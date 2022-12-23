@@ -44,7 +44,7 @@ fn parse(func: &String) -> Duration {
         "day20" => bench(day20::main),
         "day21" => bench(day21::main),
         "day22" => bench(day22::main),
-        // "day23" => bench(day23::main),
+        "day23" => bench(day23::main),
         // "day24" => bench(day24::main),
         arg => {
             eprintln!("Arg not recognized: {}", arg);
@@ -54,7 +54,7 @@ fn parse(func: &String) -> Duration {
 }
 
 fn main() {
-    let days: Vec<String> = (1..=22).map(|x| format!("day{:<02}", x)).collect();
+    let days: Vec<String> = (1..=23).map(|x| format!("day{:<02}", x)).collect();
     let args: Vec<String> = env::args().skip(1).collect();
 
     args.iter().for_each(|v| match v.as_str() {
