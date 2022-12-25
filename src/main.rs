@@ -46,6 +46,7 @@ fn parse(func: &String) -> Duration {
         "day22" => bench(day22::main),
         "day23" => bench(day23::main),
         "day24" => bench(day24::main),
+        "day25" => bench(day25::main),
         arg => {
             eprintln!("Arg not recognized: {}", arg);
             exit(1);
